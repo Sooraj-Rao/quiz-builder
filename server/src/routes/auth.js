@@ -6,7 +6,6 @@ import { authenticate } from "../middleware/auth.js";
 
 const router = express.Router();
 
-// Register
 router.post(
   "/register",
   [
@@ -24,12 +23,11 @@ router.post(
   ],
   async (req, res) => {
     try {
-      console.log(req.body);
-      // const errors = validationResult(req);
-      // if (!errors.isEmpty()) {
-      //   console.log(errors.array());
-      //   return res.status(400).json({ errors: errors.array() });
-      // }
+      const errors = validationResult(req);
+      if (!errors.isEmpty()) {
+        console.log(errors.array());
+        return res.status(400).json({ errors: errors.array() });
+      }
 
       const { name, email, password } = req.body;
 
@@ -63,7 +61,6 @@ router.post(
   }
 );
 
-// Login
 router.post(
   "/login",
   [
@@ -113,7 +110,6 @@ router.post(
   }
 );
 
-// Get current user
 router.get("/me", authenticate, (req, res) => {
   res.json({
     user: {

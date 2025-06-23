@@ -2,29 +2,22 @@
 
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { useAuth } from "../contexts/AuthContext";
+import { useAuth } from "../../../contexts/AuthContext";
+import "./Login.css"; 
 
-const Register = () => {
+const Login = () => {
   const [formData, setFormData] = useState({
-    name: "",
     email: "",
     password: "",
-    confirmPassword: "",
   });
   const [errors, setErrors] = useState({});
   const [loading, setLoading] = useState(false);
 
-  const { register } = useAuth();
+  const { login } = useAuth();
   const navigate = useNavigate();
 
   const validateForm = () => {
     const newErrors = {};
-
-    if (!formData.name) {
-      newErrors.name = "Name is required";
-    } else if (formData.name.length < 2) {
-      newErrors.name = "Name must be at least 2 characters";
-    }
 
     if (!formData.email) {
       newErrors.email = "Email is required";
@@ -34,12 +27,6 @@ const Register = () => {
 
     if (!formData.password) {
       newErrors.password = "Password is required";
-    } else if (formData.password.length < 6) {
-      newErrors.password = "Password must be at least 6 characters";
-    }
-
-    if (formData.password !== formData.confirmPassword) {
-      newErrors.confirmPassword = "Passwords do not match";
     }
 
     setErrors(newErrors);
@@ -66,11 +53,7 @@ const Register = () => {
     if (!validateForm()) return;
 
     setLoading(true);
-    const result = await register(
-      formData.name,
-      formData.email,
-      formData.password
-    );
+    const result = await login(formData.email, formData.password);
 
     if (result.success) {
       navigate("/dashboard");
@@ -84,25 +67,12 @@ const Register = () => {
   return (
     <div className="container">
       <div className="card" style={{ maxWidth: "400px", margin: "50px auto" }}>
-        <h2 className="text-center mb-20">Register as Student</h2>
+        <h2 className="text-center mb-20">Login</h2>
 
         <form onSubmit={handleSubmit}>
           {errors.general && (
             <div className="error mb-20">{errors.general}</div>
           )}
-
-          <div className="form-group">
-            <label className="form-label">Name</label>
-            <input
-              type="text"
-              name="name"
-              className="form-input"
-              value={formData.name}
-              onChange={handleChange}
-              placeholder="Enter your name"
-            />
-            {errors.name && <div className="error">{errors.name}</div>}
-          </div>
 
           <div className="form-group">
             <label className="form-label">Email</label>
@@ -130,34 +100,19 @@ const Register = () => {
             {errors.password && <div className="error">{errors.password}</div>}
           </div>
 
-          <div className="form-group">
-            <label className="form-label">Confirm Password</label>
-            <input
-              type="password"
-              name="confirmPassword"
-              className="form-input"
-              value={formData.confirmPassword}
-              onChange={handleChange}
-              placeholder="Confirm your password"
-            />
-            {errors.confirmPassword && (
-              <div className="error">{errors.confirmPassword}</div>
-            )}
-          </div>
-
           <button
             type="submit"
             className="btn btn-primary"
             style={{ width: "100%" }}
             disabled={loading}
           >
-            {loading ? "Registering..." : "Register"}
+            {loading ? "Logging in..." : "Login"}
           </button>
         </form>
 
         <div className="text-center mt-20">
           <p>
-            Already have an account? <Link to="/login">Login here</Link>
+            Don't have an account? <Link to="/register">Register here</Link>
           </p>
         </div>
       </div>
@@ -165,4 +120,4 @@ const Register = () => {
   );
 };
 
-export default Register;
+export default Login;

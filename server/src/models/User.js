@@ -28,7 +28,7 @@ const attemptSchema = new mongoose.Schema({
     required: true,
   },
   timeSpent: {
-    type: Number, // in seconds
+    type: Number,
     required: true,
   },
   violations: {
@@ -43,8 +43,8 @@ const attemptSchema = new mongoose.Schema({
   ],
   answers: [
     {
-      type: Number, // Store user's selected option index for each question
-      default: -1, // -1 means no answer selected
+      type: Number,
+      default: -1,
     },
   ],
   attemptedAt: {

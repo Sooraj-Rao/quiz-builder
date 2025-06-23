@@ -5,7 +5,6 @@ import jwt from "jsonwebtoken";
 
 const router = express.Router();
 
-// Admin authentication middleware
 const authenticateAdmin = (req, res, next) => {
   const token = req.header("Authorization")?.replace("Bearer ", "");
 
@@ -28,7 +27,6 @@ const authenticateAdmin = (req, res, next) => {
   }
 };
 
-// Admin login
 router.post("/login", async (req, res) => {
   try {
     const { email, password } = req.body;
@@ -63,7 +61,6 @@ router.post("/login", async (req, res) => {
   }
 });
 
-// Get all users with their test attempts
 router.get("/users", authenticateAdmin, async (req, res) => {
   try {
     const users = await User.find().select("-password").sort({ createdAt: -1 });
@@ -73,7 +70,6 @@ router.get("/users", authenticateAdmin, async (req, res) => {
   }
 });
 
-// Get all tests
 router.get("/tests", authenticateAdmin, async (req, res) => {
   try {
     const tests = await Test.find().sort({ createdAt: -1 });
@@ -83,13 +79,11 @@ router.get("/tests", authenticateAdmin, async (req, res) => {
   }
 });
 
-// Create new test
 router.post("/tests", authenticateAdmin, async (req, res) => {
   try {
     const { title, testId, description, timeLimit, questions, passPercentage } =
       req.body;
 
-    // Check if testId already exists
     const existingTest = await Test.findOne({ testId: testId.toUpperCase() });
     if (existingTest) {
       return res.status(400).json({ message: "Test ID already exists" });
@@ -114,7 +108,6 @@ router.post("/tests", authenticateAdmin, async (req, res) => {
   }
 });
 
-// Get single test for editing
 router.get("/tests/:testId", authenticateAdmin, async (req, res) => {
   try {
     const test = await Test.findOne({
@@ -129,11 +122,11 @@ router.get("/tests/:testId", authenticateAdmin, async (req, res) => {
   }
 });
 
-// Update test
 router.put("/tests/:testId", authenticateAdmin, async (req, res) => {
   try {
     const {
       title,
+      testId,
       description,
       timeLimit,
       questions,
@@ -143,10 +136,17 @@ router.put("/tests/:testId", authenticateAdmin, async (req, res) => {
 
     const test = await Test.findOneAndUpdate(
       { testId: req.params.testId.toUpperCase() },
-      { title, description, timeLimit, questions, isActive, passPercentage },
+      {
+        testId,
+        title,
+        description,
+        timeLimit,
+        questions,
+        isActive,
+        passPercentage,
+      },
       { new: true, runValidators: true }
     );
-
     if (!test) {
       return res.status(404).json({ message: "Test not found" });
     }
@@ -160,7 +160,6 @@ router.put("/tests/:testId", authenticateAdmin, async (req, res) => {
   }
 });
 
-// Delete test
 router.delete("/tests/:testId", authenticateAdmin, async (req, res) => {
   try {
     const test = await Test.findOneAndDelete({
@@ -175,7 +174,6 @@ router.delete("/tests/:testId", authenticateAdmin, async (req, res) => {
   }
 });
 
-// Update user details
 router.put("/users/:userId", authenticateAdmin, async (req, res) => {
   try {
     const { userId } = req.params;
@@ -205,7 +203,6 @@ router.put("/users/:userId", authenticateAdmin, async (req, res) => {
   }
 });
 
-// Delete user
 router.delete("/users/:userId", authenticateAdmin, async (req, res) => {
   try {
     const { userId } = req.params;
@@ -221,7 +218,6 @@ router.delete("/users/:userId", authenticateAdmin, async (req, res) => {
   }
 });
 
-// Get test analytics
 router.get("/analytics/:testId", authenticateAdmin, async (req, res) => {
   try {
     const { testId } = req.params;
@@ -252,7 +248,6 @@ router.get("/analytics/:testId", authenticateAdmin, async (req, res) => {
   }
 });
 
-// Get detailed test result for a specific attempt
 router.get(
   "/test-result/:userId/:attemptId",
   authenticateAdmin,
@@ -268,17 +263,16 @@ router.get(
       }
 
       const attempt = user.testAttempts.id(attemptId);
+
       if (!attempt) {
         return res.status(404).json({ message: "Test attempt not found" });
       }
 
-      // Get the test to reconstruct the detailed results
       const test = await Test.findOne({ testId: attempt.testId });
       if (!test) {
         return res.status(404).json({ message: "Test not found" });
       }
 
-      // Reconstruct the detailed results
       const results = [];
       test.questions.forEach((question, index) => {
         const userAnswer =
@@ -320,7 +314,7 @@ router.get(
         },
         results,
       };
-
+      console.log(detailedResult);
       res.json(detailedResult);
     } catch (error) {
       res.status(500).json({ message: "Server error" });

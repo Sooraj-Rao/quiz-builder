@@ -1,30 +1,36 @@
 "use client";
-import { Link, useNavigate } from "react-router-dom";
-import { useAuth } from "../contexts/AuthContext";
+import { Link, useLocation, useNavigate } from "react-router-dom";
+import { useAuth } from "../../contexts/AuthContext";
+import "./Navbar.css";
 
 const Navbar = () => {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
-
+  const { pathname } = useLocation();
   const handleLogout = () => {
     logout();
     navigate("/");
   };
-
+  const isTest = pathname.includes("test");
+  const isDashboard = pathname.includes("dashboard");
+  const isAdminDashboard = pathname.includes("admin/dashboard");
+  if (isTest || isAdminDashboard) return null;
   return (
     <nav className="navbar">
       <div className="container">
         <div className="navbar-content">
           <Link to="/" className="navbar-brand">
-            🎯 QuizMaster
+            Online Examination Portal
           </Link>
 
           <div className="navbar-nav">
             {user ? (
               <>
-                <Link to="/dashboard" className="navbar-link">
-                  Dashboard
-                </Link>
+                {!isDashboard && (
+                  <Link to="/dashboard" className="navbar-link">
+                    Dashboard
+                  </Link>
+                )}
                 <div className="navbar-user">
                   <span>👋 {user.name}</span>
                   <span className="badge badge-success">Student</span>

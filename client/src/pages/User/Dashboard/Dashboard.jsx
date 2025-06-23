@@ -1,9 +1,11 @@
+/* eslint-disable no-unused-vars */
 "use client";
 
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
-import { useAuth } from "../contexts/AuthContext";
+import { useAuth } from "../../../contexts/AuthContext";
 import axios from "axios";
+import "./Dashboard.css";
 
 const Dashboard = () => {
   const { user } = useAuth();
@@ -23,7 +25,7 @@ const Dashboard = () => {
       setLoading(true);
       const response = await axios.get("http://localhost:5000/api/tests");
       setTests(response.data);
-    } catch (error) {
+    } catch {
       setError("Failed to fetch tests");
     } finally {
       setLoading(false);
@@ -36,7 +38,7 @@ const Dashboard = () => {
         "http://localhost:5000/api/tests/user/history"
       );
       setTestHistory(response.data);
-    } catch (error) {
+    } catch {
       console.error("Failed to fetch test history");
     }
   };
@@ -73,7 +75,6 @@ const Dashboard = () => {
         <p>Welcome back, {user?.name}!</p>
       </div>
 
-      {/* Join Test */}
       <div className="card">
         <h2>Join a Test</h2>
         <form onSubmit={handleJoinTest} className="flex gap-10 align-center">
@@ -91,9 +92,6 @@ const Dashboard = () => {
         </form>
       </div>
 
-
-
-      {/* Test History */}
       <div className="card">
         <h2>📊 Your Test History</h2>
         {testHistory.length === 0 ? (

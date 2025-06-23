@@ -26,16 +26,9 @@ export const authenticate = async (req, res, next) => {
   }
 };
 
-export const requireTeacher = (req, res, next) => {
-  if (req.user.role !== "teacher") {
-    return res.status(403).json({ message: "Teacher access required" });
-  }
-  next();
-};
-
 export const requireAdministrator = (req, res, next) => {
-  const adminEmail = process.env.ADMIN_EMAIL || "admin@quizapp.com";
-  const adminPassword = process.env.ADMIN_PASSWORD || "admin123";
+  const adminEmail = process.env.ADMIN_EMAIL;
+  const adminPassword = process.env.ADMIN_PASSWORD;
 
   const { email, password } = req.body;
 

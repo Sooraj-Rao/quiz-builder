@@ -21,7 +21,6 @@ export const AdminProvider = ({ children }) => {
     const token = localStorage.getItem("adminToken");
     if (token) {
       axios.defaults.headers.common["Authorization"] = `Bearer ${token}`;
-      // Set admin from token without making API call since admin doesn't exist in DB
       try {
         const payload = JSON.parse(atob(token.split(".")[1]));
         if (payload.role === "admin") {
@@ -32,7 +31,7 @@ export const AdminProvider = ({ children }) => {
             role: "admin",
           });
         }
-      } catch (error) {
+      } catch {
         localStorage.removeItem("adminToken");
         delete axios.defaults.headers.common["Authorization"];
       }

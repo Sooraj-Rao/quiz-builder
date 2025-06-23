@@ -2,7 +2,8 @@
 
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { useAdmin } from "../contexts/AdminContext";
+import { useAdmin } from "../../../contexts/AdminContext";
+import "./AdminLogin.css"; 
 
 const AdminLogin = () => {
   const [formData, setFormData] = useState({
@@ -52,7 +53,7 @@ const AdminLogin = () => {
     >
       <div className="card" style={{ maxWidth: "400px", width: "100%" }}>
         <div className="text-center mb-24">
-          <h1 className="card-title">🔐 Administrator Access</h1>
+          <h1 className="card-title"> Administrator Access</h1>
           <p className="card-subtitle">
             Enter administrator credentials to continue
           </p>
@@ -81,7 +82,7 @@ const AdminLogin = () => {
               className="form-input"
               value={formData.email}
               onChange={handleChange}
-              placeholder="admin@quizapp.com"
+              placeholder="Enter admin email"
               required
             />
           </div>

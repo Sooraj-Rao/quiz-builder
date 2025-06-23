@@ -11,18 +11,15 @@ dotenv.config();
 const app = express();
 const PORT = process.env.PORT || 5000;
 
-// Middleware
 app.use(cors());
 app.use(express.json());
 
-// Routes
 app.use("/api/auth", authRoutes);
 app.use("/api/tests", testRoutes);
 app.use("/api/admin", adminRoutes);
 
-// MongoDB Connection
 mongoose
-  .connect(process.env.MONGODB_URI || "mongodb://localhost:27017/quizapp")
+  .connect(process.env.MONGODB_URI || "mongodb://localhost:27017/examDB")
   .then(() => console.log("MongoDB connected"))
   .catch((err) => console.log("MongoDB connection error:", err));
 

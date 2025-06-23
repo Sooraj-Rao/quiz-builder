@@ -2,8 +2,9 @@
 
 import { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
-import { useAdmin } from "../contexts/AdminContext";
+import { useAdmin } from "../../../contexts/AdminContext";
 import axios from "axios";
+import "./AdminTestResult.css";
 
 const AdminTestResult = () => {
   const { userId, attemptId } = useParams();
@@ -111,12 +112,15 @@ const AdminTestResult = () => {
     <div className="container">
       <div className="card text-center">
         <div className="flex justify-between align-center mb-20">
-          <h1>📋 Admin Test Result Review</h1>
+          <h1>Test Result Review</h1>
           <div className="flex gap-12">
             <button onClick={handlePrint} className="btn btn-secondary">
               Print Result
             </button>
-            <button onClick={() => window.close()} className="btn btn-primary">
+            <button
+              onClick={() => (window.location.href = "/admin/dashboard")}
+              className="btn btn-primary"
+            >
               Close
             </button>
           </div>
@@ -148,7 +152,6 @@ const AdminTestResult = () => {
           </div>
         </div>
 
-        {/* Result Summary */}
         <div
           className="card"
           style={{
@@ -171,7 +174,6 @@ const AdminTestResult = () => {
           </h3>
         </div>
 
-        {/* Stats */}
         <div className="grid grid-4 mb-20">
           <div className="card">
             <h4>✅ Correct Answers</h4>
@@ -214,10 +216,9 @@ const AdminTestResult = () => {
           </div>
         </div>
 
-        {/* Detailed Question Analysis */}
         {result.attempt.status !== "disqualified" && (
           <div className="card">
-            <h3>📊 Detailed Question Analysis</h3>
+            <h3>Question Analysis</h3>
             {result.results.map((item, index) => (
               <div key={index} className="card">
                 <div className="flex justify-between align-center mb-16">
@@ -316,57 +317,6 @@ const AdminTestResult = () => {
             ))}
           </div>
         )}
-
-        {/* Admin Notes Section */}
-        <div
-          className="card"
-          style={{ backgroundColor: "#f8f9fa", border: "1px solid #dee2e6" }}
-        >
-          <h4>📝 Admin Review Notes</h4>
-          <div className="grid grid-2">
-            <div>
-              <p>
-                <strong>Overall Performance:</strong>{" "}
-                {result.attempt.percentage >= 90
-                  ? "Excellent"
-                  : result.attempt.percentage >= 80
-                  ? "Very Good"
-                  : result.attempt.percentage >= 70
-                  ? "Good"
-                  : result.attempt.percentage >= 60
-                  ? "Satisfactory"
-                  : "Needs Improvement"}
-              </p>
-              <p>
-                <strong>Completion Rate:</strong>{" "}
-                {Math.round(
-                  ((result.attempt.total -
-                    result.results.filter((r) => r.selectedOption === -1)
-                      .length) /
-                    result.attempt.total) *
-                    100
-                )}
-                %
-              </p>
-            </div>
-            <div>
-              <p>
-                <strong>Test Integrity:</strong>{" "}
-                {result.attempt.violations === 0
-                  ? "✅ Clean"
-                  : `⚠️ ${result.attempt.violations} violations detected`}
-              </p>
-              <p>
-                <strong>Time Efficiency:</strong>{" "}
-                {result.attempt.timeSpent < 300
-                  ? "⚡ Fast"
-                  : result.attempt.timeSpent < 600
-                  ? "⏱️ Normal"
-                  : "🐌 Slow"}
-              </p>
-            </div>
-          </div>
-        </div>
       </div>
     </div>
   );

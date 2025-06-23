@@ -1,6 +1,7 @@
 "use client";
 
 import { useLocation, useNavigate } from "react-router-dom";
+import "./TestResult.css";
 
 const TestResult = () => {
   const location = useLocation();

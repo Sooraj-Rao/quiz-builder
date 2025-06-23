@@ -2,21 +2,30 @@
 
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { useAuth } from "../contexts/AuthContext";
+import { useAuth } from "../../../contexts/AuthContext";
+import "./Register.css";
 
-const Login = () => {
+const Register = () => {
   const [formData, setFormData] = useState({
+    name: "",
     email: "",
     password: "",
+    confirmPassword: "",
   });
   const [errors, setErrors] = useState({});
   const [loading, setLoading] = useState(false);
 
-  const { login } = useAuth();
+  const { register } = useAuth();
   const navigate = useNavigate();
 
   const validateForm = () => {
     const newErrors = {};
+
+    if (!formData.name) {
+      newErrors.name = "Name is required";
+    } else if (formData.name.length < 2) {
+      newErrors.name = "Name must be at least 2 characters";
+    }
 
     if (!formData.email) {
       newErrors.email = "Email is required";
@@ -26,6 +35,12 @@ const Login = () => {
 
     if (!formData.password) {
       newErrors.password = "Password is required";
+    } else if (formData.password.length < 6) {
+      newErrors.password = "Password must be at least 6 characters";
+    }
+
+    if (formData.password !== formData.confirmPassword) {
+      newErrors.confirmPassword = "Passwords do not match";
     }
 
     setErrors(newErrors);
@@ -38,7 +53,6 @@ const Login = () => {
       [e.target.name]: e.target.value,
     });
 
-    // Clear error when user starts typing
     if (errors[e.target.name]) {
       setErrors({
         ...errors,
@@ -53,7 +67,11 @@ const Login = () => {
     if (!validateForm()) return;
 
     setLoading(true);
-    const result = await login(formData.email, formData.password);
+    const result = await register(
+      formData.name,
+      formData.email,
+      formData.password
+    );
 
     if (result.success) {
       navigate("/dashboard");
@@ -67,12 +85,25 @@ const Login = () => {
   return (
     <div className="container">
       <div className="card" style={{ maxWidth: "400px", margin: "50px auto" }}>
-        <h2 className="text-center mb-20">Login</h2>
+        <h2 className="text-center mb-20">Register as Student</h2>
 
         <form onSubmit={handleSubmit}>
           {errors.general && (
             <div className="error mb-20">{errors.general}</div>
           )}
+
+          <div className="form-group">
+            <label className="form-label">Name</label>
+            <input
+              type="text"
+              name="name"
+              className="form-input"
+              value={formData.name}
+              onChange={handleChange}
+              placeholder="Enter your name"
+            />
+            {errors.name && <div className="error">{errors.name}</div>}
+          </div>
 
           <div className="form-group">
             <label className="form-label">Email</label>
@@ -100,19 +131,34 @@ const Login = () => {
             {errors.password && <div className="error">{errors.password}</div>}
           </div>
 
+          <div className="form-group">
+            <label className="form-label">Confirm Password</label>
+            <input
+              type="password"
+              name="confirmPassword"
+              className="form-input"
+              value={formData.confirmPassword}
+              onChange={handleChange}
+              placeholder="Confirm your password"
+            />
+            {errors.confirmPassword && (
+              <div className="error">{errors.confirmPassword}</div>
+            )}
+          </div>
+
           <button
             type="submit"
             className="btn btn-primary"
             style={{ width: "100%" }}
             disabled={loading}
           >
-            {loading ? "Logging in..." : "Login"}
+            {loading ? "Registering..." : "Register"}
           </button>
         </form>
 
         <div className="text-center mt-20">
           <p>
-            Don't have an account? <Link to="/register">Register here</Link>
+            Already have an account? <Link to="/login">Login here</Link>
           </p>
         </div>
       </div>
@@ -120,4 +166,4 @@ const Login = () => {
   );
 };
 
-export default Login;
+export default Register;

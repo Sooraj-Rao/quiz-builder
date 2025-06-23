@@ -1,0 +1,137 @@
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 20px;
+}
+
+.card {
+  background: var(--card-background);
+  border-radius: 12px;
+  padding: 24px;
+  box-shadow: var(--shadow);
+  margin-bottom: 24px;
+  border: 1px solid var(--border-color);
+}
+
+.text-center {
+  text-align: center;
+}
+.mb-20 {
+  margin-bottom: 20px;
+}
+.mt-20 {
+  margin-top: 20px;
+}
+
+.grid {
+  display: grid;
+  gap: 24px;
+}
+.grid-3 {
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+}
+
+.flex {
+  display: flex;
+}
+.justify-center {
+  justify-content: center;
+}
+.gap-10 {
+  gap: 10px;
+}
+
+.btn {
+  padding: 12px 24px;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 600;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  transition: all 0.2s ease;
+  gap: 8px;
+  min-height: 44px;
+}
+.btn-primary {
+  background: linear-gradient(135deg, var(--primary-color), var(--primary-hover));
+  color: white;
+  box-shadow: var(--shadow);
+}
+.btn-primary:hover:not(:disabled) {
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-lg);
+}
+.btn-secondary {
+  background-color: var(--secondary-color);
+  color: white;
+  box-shadow: var(--shadow);
+}
+.btn-secondary:hover:not(:disabled) {
+  background-color: #4b5563;
+  transform: translateY(-1px);
+}
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+.badge-success {
+  background: rgba(16, 185, 129, 0.1);
+  color: var(--success-color);
+}
+.badge-danger {
+  background: rgba(239, 68, 68, 0.1);
+  color: var(--danger-color);
+}
+
+.quiz-option {
+  padding: 16px 20px;
+  border: 2px solid var(--border-color);
+  border-radius: 12px;
+  margin-bottom: 12px;
+  background: white;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.quiz-option.correct {
+  border-color: var(--success-color);
+  background: linear-gradient(
+    135deg,
+    rgba(16, 185, 129, 0.1),
+    rgba(5, 150, 105, 0.05)
+  );
+}
+.quiz-option.incorrect {
+  border-color: var(--danger-color);
+  background: linear-gradient(
+    135deg,
+    rgba(239, 68, 68, 0.1),
+    rgba(220, 38, 38, 0.05)
+  );
+}
+
+.quiz-option-letter {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: var(--primary-color);
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 600;
+  font-size: 14px;
+  flex-shrink: 0;
+}

@@ -31,7 +31,7 @@ export const AuthProvider = ({ children }) => {
     try {
       const response = await axios.get("http://localhost:5000/api/auth/me");
       setUser(response.data.user);
-    } catch (error) {
+    } catch {
       localStorage.removeItem("token");
       delete axios.defaults.headers.common["Authorization"];
     } finally {

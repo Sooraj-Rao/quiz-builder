@@ -1,4 +1,4 @@
-import mongoose from "mongoose"
+import mongoose from "mongoose";
 
 const questionSchema = new mongoose.Schema({
   text: {
@@ -24,7 +24,7 @@ const questionSchema = new mongoose.Schema({
     enum: ["easy", "medium", "hard"],
     default: "medium",
   },
-})
+});
 
 const testSchema = new mongoose.Schema(
   {
@@ -47,7 +47,7 @@ const testSchema = new mongoose.Schema(
       maxlength: [500, "Description cannot exceed 500 characters"],
     },
     timeLimit: {
-      type: Number, // in minutes
+      type: Number,
       required: [true, "Time limit is required"],
       min: [1, "Time limit must be at least 1 minute"],
       max: [300, "Time limit cannot exceed 300 minutes"],
@@ -74,9 +74,7 @@ const testSchema = new mongoose.Schema(
   },
   {
     timestamps: true,
-  },
-)
-
+  }
+);
 
 export default mongoose.models.Test || mongoose.model("Test", testSchema);
-

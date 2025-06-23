@@ -1,8 +1,10 @@
+/* eslint-disable no-unused-vars */
 "use client";
 
 import { useState, useEffect, useRef, useCallback } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import axios from "axios";
+import "./TakeTest.css";
 
 const TakeTest = () => {
   const { testId } = useParams();
@@ -40,7 +42,6 @@ const TakeTest = () => {
     };
   }, [testId]);
 
-  // Anti-cheating measures
   useEffect(() => {
     if (!testStarted) return;
 
@@ -56,7 +57,6 @@ const TakeTest = () => {
     };
 
     const handleKeyDown = (e) => {
-      // Disable common shortcuts
       if (
         (e.ctrlKey &&
           (e.key === "c" || e.key === "v" || e.key === "a" || e.key === "x")) ||
@@ -116,7 +116,7 @@ const TakeTest = () => {
       }, 3000);
 
       if (newCount >= 3) {
-        submitTest(true); // Force submit with disqualification
+        submitTest(true); 
       }
 
       return newCount;
@@ -147,7 +147,7 @@ const TakeTest = () => {
         `http://localhost:5000/api/tests/${testId}`
       );
       setTest(response.data);
-      setTimeLeft(response.data.timeLimit * 60); // Convert minutes to seconds
+      setTimeLeft(response.data.timeLimit * 60);
     } catch (error) {
       setError(error.response?.data?.message || "Failed to load test");
     } finally {
@@ -162,14 +162,12 @@ const TakeTest = () => {
       setTestStarted(true);
       startTimeRef.current = Date.now();
 
-      // Start camera monitoring
       await startCamera();
 
-      // Start timer
       timerRef.current = setInterval(() => {
         setTimeLeft((prev) => {
           if (prev <= 1) {
-            submitTest(true); // Auto-submit when time runs out
+            submitTest(true); 
             return 0;
           }
           return prev - 1;
@@ -233,17 +231,14 @@ const TakeTest = () => {
         }
       );
 
-      // Clear timer
       if (timerRef.current) {
         clearInterval(timerRef.current);
       }
 
-      // Stop camera
       if (cameraStream) {
         cameraStream.getTracks().forEach((track) => track.stop());
       }
 
-      // Exit fullscreen
       if (document.fullscreenElement) {
         await document.exitFullscreen();
       }
@@ -370,7 +365,6 @@ const TakeTest = () => {
         userSelect: "none",
       }}
     >
-      {/* Warning Banner */}
       {showWarning && (
         <div
           style={{
@@ -390,7 +384,6 @@ const TakeTest = () => {
         </div>
       )}
 
-      {/* Camera Monitor */}
       <div
         style={{
           position: "fixed",
@@ -453,7 +446,6 @@ const TakeTest = () => {
         }}
       >
         <div className="card">
-          {/* Header */}
           <div className="flex justify-between align-center mb-20">
             <h2>{test.title}</h2>
             <div className="flex gap-20 align-center">
@@ -488,7 +480,6 @@ const TakeTest = () => {
             </div>
           </div>
 
-          {/* Progress Bar */}
           <div className="progress-bar">
             <div
               className="progress-fill"
@@ -496,7 +487,6 @@ const TakeTest = () => {
             ></div>
           </div>
 
-          {/* Question */}
           <div className="card">
             <div className="flex justify-between align-center mb-20">
               <span className="badge badge-primary">
@@ -525,7 +515,6 @@ const TakeTest = () => {
             </div>
           </div>
 
-          {/* Navigation */}
           <div className="flex justify-between align-center mt-20">
             <button
               onClick={prevQuestion}

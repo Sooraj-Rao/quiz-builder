@@ -2,8 +2,9 @@
 
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { useAdmin } from "../contexts/AdminContext";
+import { useAdmin } from "../../../contexts/AdminContext";
 import axios from "axios";
+import "./AdminDashboard.css";
 
 const AdminDashboard = () => {
   const [users, setUsers] = useState([]);
@@ -13,6 +14,7 @@ const AdminDashboard = () => {
   const [editingUser, setEditingUser] = useState(null);
   const [showUserModal, setShowUserModal] = useState(false);
   const [showTestModal, setShowTestModal] = useState(false);
+  const [EditTestId, setEditTestId] = useState("");
   const [editingTest, setEditingTest] = useState(null);
   const [analytics, setAnalytics] = useState([]);
   const [selectedTestForAnalytics, setSelectedTestForAnalytics] = useState("");
@@ -53,12 +55,6 @@ const AdminDashboard = () => {
     }
   };
 
-  const viewTestResult = (userId, attemptId) => {
-    // Open test result in new window
-    const url = `/admin/test-result/${userId}/${attemptId}`;
-    window.open(url, "_blank", "width=1200,height=800,scrollbars=yes");
-  };
-
   const handleCreateTest = () => {
     setEditingTest({
       title: "",
@@ -80,16 +76,19 @@ const AdminDashboard = () => {
 
   const handleEditTest = (test) => {
     setEditingTest({ ...test });
+    setEditTestId(test.testId);
     setShowTestModal(true);
   };
+
+  console.log(editingTest);
+  console.log(EditTestId);
 
   const handleSaveTest = async (e) => {
     e.preventDefault();
     try {
       if (editingTest._id) {
-        // Update existing test
         await axios.put(
-          `http://localhost:5000/api/admin/tests/${editingTest.testId}`,
+          `http://localhost:5000/api/admin/tests/${EditTestId}`,
           editingTest
         );
         setTests(
@@ -97,24 +96,20 @@ const AdminDashboard = () => {
             test._id === editingTest._id ? editingTest : test
           )
         );
+        setEditingTest(null);
+        setEditTestId("");
+        fetchData();
       } else {
-        // Create new test
         const response = await axios.post(
           "http://localhost:5000/api/admin/tests",
           editingTest
         );
         setTests([response.data, ...tests]);
-        setEditingTest(response.data); // Update to show the created test with ID
+        setEditingTest(response.data);
 
-        // Show success message with share option
         const link = `${window.location.origin}/test/${response.data.testId}`;
-        if (
-          window.confirm(
-            `Test created successfully!\n\nTest Link: ${link}\n\nWould you like to copy the link to clipboard?`
-          )
-        ) {
-          navigator.clipboard.writeText(link);
-        }
+        alert(`Test created successfully!\n\nTest Link: ${link}?`);
+        navigator.clipboard.writeText(link);
       }
       setShowTestModal(false);
       setEditingTest(null);
@@ -129,7 +124,7 @@ const AdminDashboard = () => {
         await axios.delete(`http://localhost:5000/api/admin/tests/${testId}`);
         setTests(tests.filter((test) => test.testId !== testId));
       } catch (error) {
-        alert("Failed to delete test");
+        alert(error.response?.data.message || "Failed to delete test");
       }
     }
   };
@@ -142,7 +137,7 @@ const AdminDashboard = () => {
         await axios.delete(`http://localhost:5000/api/admin/users/${userId}`);
         setUsers(users.filter((user) => user._id !== userId));
       } catch (error) {
-        alert("Failed to delete user");
+        alert(error.response?.data.message || "Failed to delete user");
       }
     }
   };
@@ -168,7 +163,7 @@ const AdminDashboard = () => {
       setShowUserModal(false);
       setEditingUser(null);
     } catch (error) {
-      alert("Failed to update user");
+      alert(error.response?.data.message || "Failed to update user");
     }
   };
 
@@ -254,7 +249,7 @@ const AdminDashboard = () => {
                   marginBottom: "8px",
                 }}
               >
-                🛠️ Administrator Dashboard
+                Administrator Dashboard
               </h1>
               <p style={{ opacity: "0.8" }}>
                 Manage users, tests, and view analytics
@@ -268,7 +263,6 @@ const AdminDashboard = () => {
       </div>
 
       <div className="container">
-        {/* Stats Overview */}
         <div className="admin-stats">
           <div className="stat-card">
             <div className="stat-number">{stats.totalUsers}</div>
@@ -288,7 +282,6 @@ const AdminDashboard = () => {
           </div>
         </div>
 
-        {/* Tab Navigation */}
         <div className="card">
           <div
             className="flex gap-16 mb-24"
@@ -323,7 +316,6 @@ const AdminDashboard = () => {
             </button>
           </div>
 
-          {/* Users Tab */}
           {activeTab === "users" && (
             <div>
               <h3 className="mb-20">User Management</h3>
@@ -373,13 +365,12 @@ const AdminDashboard = () => {
             </div>
           )}
 
-          {/* Tests Tab */}
           {activeTab === "tests" && (
             <div>
               <div className="flex justify-between align-center mb-20">
                 <h3>Test Management</h3>
                 <button onClick={handleCreateTest} className="btn btn-primary">
-                  ➕ Create New Test
+                  + Create New Test
                 </button>
               </div>
               <div style={{ overflowX: "auto" }}>
@@ -422,9 +413,7 @@ const AdminDashboard = () => {
                               onClick={() => {
                                 const link = `${window.location.origin}/test/${test.testId}`;
                                 navigator.clipboard.writeText(link);
-                                alert(
-                                  `Test link copied to clipboard!\n${link}`
-                                );
+                                alert(`Test link copied to clipboard!`);
                               }}
                               className="btn btn-secondary btn-sm"
                               title="Copy test link"
@@ -453,7 +442,6 @@ const AdminDashboard = () => {
             </div>
           )}
 
-          {/* Analytics Tab */}
           {activeTab === "analytics" && (
             <div>
               <h3 className="mb-20">Test Analytics</h3>
@@ -538,18 +526,6 @@ const AdminDashboard = () => {
                             {new Date(attempt.attemptedAt).toLocaleDateString()}
                           </td>
                           <td>
-                            <button
-                              onClick={() =>
-                                viewTestResult(
-                                  attempt.userId,
-                                  attempt.attemptId
-                                )
-                              }
-                              className="btn btn-primary btn-sm"
-                              title="View detailed test result"
-                            >
-                              📋 View Result
-                            </button>
                             <a
                               href={`/admin/test-result/${attempt.userId}/${attempt.attemptId}`}
                               className="btn btn-secondary btn-sm"
@@ -569,7 +545,6 @@ const AdminDashboard = () => {
         </div>
       </div>
 
-      {/* User Edit Modal */}
       {showUserModal && editingUser && (
         <div className="modal-overlay" onClick={() => setShowUserModal(false)}>
           <div className="modal" onClick={(e) => e.stopPropagation()}>
@@ -627,7 +602,6 @@ const AdminDashboard = () => {
         </div>
       )}
 
-      {/* Test Create/Edit Modal */}
       {showTestModal && editingTest && (
         <div className="modal-overlay" onClick={() => setShowTestModal(false)}>
           <div
@@ -668,6 +642,7 @@ const AdminDashboard = () => {
                 <label className="form-label">Test ID (Code)</label>
                 <input
                   type="text"
+                  minLength={3}
                   className="form-input"
                   value={editingTest.testId}
                   onChange={(e) =>
@@ -682,7 +657,7 @@ const AdminDashboard = () => {
               </div>
 
               <div className="form-group">
-                <label className="form-label">Description</label>
+                <label className="form-label">Description (optional)</label>
                 <textarea
                   className="form-textarea"
                   value={editingTest.description}
@@ -692,7 +667,7 @@ const AdminDashboard = () => {
                       description: e.target.value,
                     })
                   }
-                  placeholder="Optional test description"
+                  placeholder="Test description"
                 />
               </div>
 
@@ -727,7 +702,7 @@ const AdminDashboard = () => {
                         passPercentage: Number.parseInt(e.target.value),
                       })
                     }
-                    min="0"
+                    min="10"
                     max="100"
                     required
                   />
@@ -742,7 +717,7 @@ const AdminDashboard = () => {
                     onClick={addQuestion}
                     className="btn btn-secondary btn-sm"
                   >
-                    ➕ Add Question
+                    + Add Question
                   </button>
                 </div>
 
@@ -774,7 +749,7 @@ const AdminDashboard = () => {
                       />
                     </div>
 
-                    <div className="form-group">
+                    {/* <div className="form-group">
                       <label className="form-label">Difficulty Level</label>
                       <select
                         className="form-select"
@@ -787,7 +762,7 @@ const AdminDashboard = () => {
                         <option value="medium">Medium</option>
                         <option value="hard">Hard</option>
                       </select>
-                    </div>
+                    </div> */}
 
                     <div className="form-group">
                       <div className="flex justify-between align-center mb-12">
@@ -800,7 +775,7 @@ const AdminDashboard = () => {
                             onClick={() => addOption(qIndex)}
                             className="btn btn-secondary btn-sm"
                           >
-                            ➕ Add Option
+                            + Add Option
                           </button>
                         )}
                       </div>
@@ -848,7 +823,14 @@ const AdminDashboard = () => {
                   </div>
                 ))}
               </div>
-
+              <button
+                type="button"
+                onClick={addQuestion}
+                style={{ marginBottom: "10px" }}
+                className="btn btn-secondary btn-sm "
+              >
+                + Add Question
+              </button>
               <div className="flex gap-12 justify-between">
                 <button
                   type="button"
@@ -864,7 +846,7 @@ const AdminDashboard = () => {
                       onClick={() => {
                         const link = `${window.location.origin}/test/${editingTest.testId}`;
                         navigator.clipboard.writeText(link);
-                        alert(`Test link copied to clipboard!\n${link}`);
+                        alert(`Test link copied to clipboard!`);
                       }}
                       className="btn btn-success"
                     >
