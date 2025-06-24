@@ -4,7 +4,6 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import axios from "axios";
-import "./TakeTest.css";
 
 const TakeTest = () => {
   const { testId } = useParams();
@@ -30,25 +29,34 @@ const TakeTest = () => {
   const violationTimeoutRef = useRef(null);
   const videoRef = useRef(null);
 
+  const violationsRef = useRef(0);
+  const violationTypesRef = useRef([]);
+
   useEffect(() => {
     fetchTest();
     return () => {
       if (timerRef.current) clearInterval(timerRef.current);
       if (violationTimeoutRef.current)
         clearTimeout(violationTimeoutRef.current);
+      if (cameraStream)
+        cameraStream.getTracks().forEach((track) => track.stop());
+    };
+  }, [testId]);
+
+  useEffect(() => {
+    return () => {
       if (cameraStream) {
         cameraStream.getTracks().forEach((track) => track.stop());
       }
     };
-  }, [testId]);
+  }, [cameraStream]);
 
   useEffect(() => {
     if (!testStarted) return;
 
     const handleVisibilityChange = () => {
-      if (document.hidden) {
+      if (document.hidden)
         recordViolation("tab_switch", "Tab switching detected!");
-      }
     };
 
     const handleContextMenu = (e) => {
@@ -59,11 +67,9 @@ const TakeTest = () => {
     const handleKeyDown = (e) => {
       if (
         (e.ctrlKey &&
-          (e.key === "c" || e.key === "v" || e.key === "a" || e.key === "x")) ||
+          ["c", "v", "a", "x", "u"].includes(e.key.toLowerCase())) ||
         e.key === "F12" ||
-        (e.ctrlKey && e.shiftKey && e.key === "I") ||
-        (e.ctrlKey && e.shiftKey && e.key === "J") ||
-        (e.ctrlKey && e.key === "u")
+        (e.ctrlKey && e.shiftKey && ["I", "J"].includes(e.key))
       ) {
         e.preventDefault();
         recordViolation(
@@ -100,46 +106,28 @@ const TakeTest = () => {
   }, [testStarted]);
 
   const recordViolation = useCallback((type, message) => {
-    setViolations((prev) => {
-      const newCount = prev + 1;
-      setViolationTypes((prevTypes) => [...prevTypes, type]);
+    const newCount = violationsRef.current + 1;
+    violationsRef.current = newCount;
+    violationTypesRef.current = [...violationTypesRef.current, type];
 
-      setWarningMessage(message);
-      setShowWarning(true);
+    setViolations(newCount);
+    setViolationTypes(violationTypesRef.current);
 
-      if (violationTimeoutRef.current) {
-        clearTimeout(violationTimeoutRef.current);
-      }
+    setWarningMessage(message);
+    setShowWarning(true);
 
-      violationTimeoutRef.current = setTimeout(() => {
-        setShowWarning(false);
-      }, 3000);
-
-      if (newCount >= 3) {
-        submitTest(true); 
-      }
-
-      return newCount;
-    });
-  }, []);
-
-  const startCamera = async () => {
-    try {
-      const stream = await navigator.mediaDevices.getUserMedia({
-        video: { width: 320, height: 240 },
-        audio: false,
-      });
-      setCameraStream(stream);
-      if (videoRef.current) {
-        videoRef.current.srcObject = stream;
-      }
-    } catch (error) {
-      setCameraError(
-        "Camera access denied. Test will continue without camera monitoring."
-      );
-      console.error("Camera error:", error);
+    if (violationTimeoutRef.current) {
+      clearTimeout(violationTimeoutRef.current);
     }
-  };
+
+    violationTimeoutRef.current = setTimeout(() => {
+      setShowWarning(false);
+    }, 3000);
+
+    if (newCount >= 3) {
+      submitTest(true);
+    }
+  }, []);
 
   const fetchTest = async () => {
     try {
@@ -155,19 +143,33 @@ const TakeTest = () => {
     }
   };
 
+  const startCamera = async () => {
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({
+        video: { width: 320, height: 240 },
+        audio: false,
+      });
+      setCameraStream(stream);
+      if (videoRef.current) videoRef.current.srcObject = stream;
+    } catch (error) {
+      setCameraError(
+        "Camera access denied. Test will continue without camera monitoring."
+      );
+    }
+  };
+
   const startTest = async () => {
     try {
       await document.documentElement.requestFullscreen();
       setIsFullscreen(true);
       setTestStarted(true);
       startTimeRef.current = Date.now();
-
       await startCamera();
 
       timerRef.current = setInterval(() => {
         setTimeLeft((prev) => {
           if (prev <= 1) {
-            submitTest(true); 
+            submitTest(true);
             return 0;
           }
           return prev - 1;
@@ -179,10 +181,7 @@ const TakeTest = () => {
   };
 
   const handleAnswerSelect = (questionIndex, optionIndex) => {
-    setAnswers({
-      ...answers,
-      [questionIndex]: optionIndex,
-    });
+    setAnswers({ ...answers, [questionIndex]: optionIndex });
   };
 
   const nextQuestion = () => {
@@ -200,16 +199,13 @@ const TakeTest = () => {
   const submitTest = async (forceSubmit = false) => {
     if (!forceSubmit) {
       const unanswered = test?.questions?.filter(
-        (_, index) => answers[index] === undefined
+        (_, i) => answers[i] === undefined
       );
       if (unanswered.length > 0) {
-        if (
-          !window.confirm(
-            `You have ${unanswered.length} unanswered questions. Submit anyway?`
-          )
-        ) {
-          return;
-        }
+        const confirm = window.confirm(
+          `You have ${unanswered.length} unanswered questions. Submit anyway?`
+        );
+        if (!confirm) return;
       }
     }
 
@@ -221,27 +217,25 @@ const TakeTest = () => {
         (_, index) => answers[index] ?? -1
       );
 
+      const finalViolations = forceSubmit ? violationsRef.current : violations;
+      const finalViolationTypes = forceSubmit
+        ? violationTypesRef.current
+        : violationTypes;
+
       const response = await axios.post(
         `http://localhost:5000/api/tests/${testId}/submit`,
         {
           answers: formattedAnswers,
           timeSpent,
-          violations,
-          violationTypes,
+          violations: finalViolations,
+          violationTypes: finalViolationTypes,
         }
       );
 
-      if (timerRef.current) {
-        clearInterval(timerRef.current);
-      }
-
-      if (cameraStream) {
+      if (timerRef.current) clearInterval(timerRef.current);
+      if (cameraStream)
         cameraStream.getTracks().forEach((track) => track.stop());
-      }
-
-      if (document.fullscreenElement) {
-        await document.exitFullscreen();
-      }
+      if (document.fullscreenElement) await document.exitFullscreen();
 
       navigate("/test-result", { state: { result: response.data } });
     } catch (error) {
@@ -253,9 +247,7 @@ const TakeTest = () => {
   const formatTime = (seconds) => {
     const mins = Math.floor(seconds / 60);
     const secs = seconds % 60;
-    return `${mins.toString().padStart(2, "0")}:${secs
-      .toString()
-      .padStart(2, "0")}`;
+    return `${String(mins).padStart(2, "0")}:${String(secs).padStart(2, "0")}`;
   };
 
   if (loading) {
@@ -313,7 +305,7 @@ const TakeTest = () => {
             <div className="card">
               <h4>📝 Questions</h4>
               <p style={{ fontSize: "24px", color: "var(--primary-color)" }}>
-                {test.questions.length}
+                {test?.questions?.length}
               </p>
             </div>
           </div>
@@ -350,7 +342,7 @@ const TakeTest = () => {
   }
 
   const currentQ = test.questions[currentQuestion];
-  const progress = ((currentQuestion + 1) / test.questions.length) * 100;
+  const progress = ((currentQuestion + 1) / test?.questions?.length) * 100;
 
   return (
     <div
@@ -462,7 +454,7 @@ const TakeTest = () => {
                 ⏱️ {formatTime(timeLeft)}
               </div>
               <span>
-                Question {currentQuestion + 1} of {test.questions.length}
+                Question {currentQuestion + 1} of {test?.questions?.length}
               </span>
               {violations > 0 && (
                 <span
@@ -488,30 +480,34 @@ const TakeTest = () => {
           </div>
 
           <div className="card">
-            <div className="flex justify-between align-center mb-20">
-              <span className="badge badge-primary">
-                {currentQ.level.toUpperCase()}
-              </span>
-            </div>
-
             <h3 className="mb-20">{currentQ.text}</h3>
-
             <div>
-              {currentQ.options.map((option, index) => (
-                <div
-                  key={index}
-                  className={`quiz-option ${
-                    answers[currentQuestion] === index ? "selected" : ""
-                  }`}
-                  onClick={() => handleAnswerSelect(currentQuestion, index)}
-                  style={{ cursor: "pointer" }}
-                >
-                  <div className="quiz-option-letter">
-                    {String.fromCharCode(65 + index)}
+              {currentQ.options.map((option, index) => {
+                console.log(answers[currentQuestion] === index);
+                return (
+                  <div
+                    key={index}
+                    className={`quiz-option ${
+                      answers[currentQuestion] === index ? "selected" : ""
+                    }`}
+                    onClick={() => handleAnswerSelect(currentQuestion, index)}
+                    style={{
+                      cursor: "pointer",
+                      borderColor:
+                        answers[currentQuestion] === index &&
+                        "var(--primary-color)",
+                      background:
+                        answers[currentQuestion] === index &&
+                        " linear-gradient(135deg,rgba(79, 70, 229, 0.1),rgba(79, 70, 229, 0.05))",
+                    }}
+                  >
+                    <div className="quiz-option-letter">
+                      {String.fromCharCode(65 + index)}
+                    </div>
+                    <span>{option}</span>
                   </div>
-                  <span>{option}</span>
-                </div>
-              ))}
+                );
+              })}
             </div>
           </div>
 
@@ -525,10 +521,11 @@ const TakeTest = () => {
             </button>
 
             <span>
-              {Object.keys(answers).length} of {test.questions.length} answered
+              {Object.keys(answers).length} of {test?.questions?.length}{" "}
+              answered
             </span>
 
-            {currentQuestion === test.questions.length - 1 ? (
+            {currentQuestion === test?.questions?.length - 1 ? (
               <button
                 onClick={() => submitTest(false)}
                 disabled={submitting}

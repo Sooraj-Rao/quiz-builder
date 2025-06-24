@@ -224,17 +224,7 @@ const AdminTestResult = () => {
                 <div className="flex justify-between align-center mb-16">
                   <h4>Question {index + 1}</h4>
                   <div className="flex gap-8 align-center">
-                    <span
-                      className={`badge badge-${
-                        item.level === "easy"
-                          ? "success"
-                          : item.level === "medium"
-                          ? "warning"
-                          : "danger"
-                      }`}
-                    >
-                      {item.level.toUpperCase()}
-                    </span>
+                   
                     <span
                       className={`badge ${
                         item.isCorrect ? "badge-success" : "badge-danger"

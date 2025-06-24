@@ -5,6 +5,7 @@ import { useNavigate } from "react-router-dom";
 import { useAdmin } from "../../../contexts/AdminContext";
 import axios from "axios";
 import "./AdminDashboard.css";
+import { Copy } from "lucide-react";
 
 const AdminDashboard = () => {
   const [users, setUsers] = useState([]);
@@ -79,9 +80,6 @@ const AdminDashboard = () => {
     setEditTestId(test.testId);
     setShowTestModal(true);
   };
-
-  console.log(editingTest);
-  console.log(EditTestId);
 
   const handleSaveTest = async (e) => {
     e.preventDefault();
@@ -381,7 +379,6 @@ const AdminDashboard = () => {
                       <th>Test ID</th>
                       <th>Questions</th>
                       <th>Time Limit</th>
-                      <th>Status</th>
                       <th>Attempts</th>
                       <th>Actions</th>
                     </tr>
@@ -392,20 +389,25 @@ const AdminDashboard = () => {
                         <td style={{ fontWeight: "600" }}>{test.title}</td>
                         <td>
                           <span className="badge badge-primary">
-                            {test.testId}
+                            <button
+                              onClick={() => {
+                                navigator.clipboard.writeText(test.testId);
+                                alert("Test Id copied");
+                              }}
+                              style={{
+                                border: "none",
+                                display: "flex",
+                                alignItems: "center",
+                              }}
+                            >
+                              <Copy style={{ marginRight: "2px" }} size={15} />
+                              {test.testId}
+                            </button>
                           </span>
                         </td>
                         <td>{test.questions.length}</td>
                         <td>{test.timeLimit}m</td>
-                        <td>
-                          <span
-                            className={`badge ${
-                              test.isActive ? "badge-success" : "badge-danger"
-                            }`}
-                          >
-                            {test.isActive ? "Active" : "Inactive"}
-                          </span>
-                        </td>
+
                         <td>{test.totalAttempts}</td>
                         <td>
                           <div className="flex gap-8">
@@ -628,6 +630,7 @@ const AdminDashboard = () => {
               <div className="form-group">
                 <label className="form-label">Test Title</label>
                 <input
+                  minLength={6}
                   type="text"
                   className="form-input"
                   value={editingTest.title}
@@ -641,7 +644,9 @@ const AdminDashboard = () => {
               <div className="form-group">
                 <label className="form-label">Test ID (Code)</label>
                 <input
+                  disabled={editingTest}
                   type="text"
+                  title={editingTest ? "Cannot Edit Test Id once created" : ""}
                   minLength={3}
                   className="form-input"
                   value={editingTest.testId}
@@ -739,6 +744,7 @@ const AdminDashboard = () => {
                     <div className="form-group">
                       <label className="form-label">Question Text</label>
                       <textarea
+                        minLength={10}
                         className="form-textarea"
                         value={question.text}
                         onChange={(e) =>

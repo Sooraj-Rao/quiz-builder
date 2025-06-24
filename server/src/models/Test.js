@@ -5,7 +5,6 @@ const questionSchema = new mongoose.Schema({
     type: String,
     required: [true, "Question text is required"],
     trim: true,
-    minlength: [10, "Question must be at least 10 characters"],
   },
   options: [
     {
@@ -17,7 +16,6 @@ const questionSchema = new mongoose.Schema({
   answer: {
     type: Number,
     required: [true, "Correct answer index is required"],
-    min: [0, "Answer index must be 0 or greater"],
   },
   level: {
     type: String,
@@ -32,7 +30,6 @@ const testSchema = new mongoose.Schema(
       type: String,
       required: [true, "Test title is required"],
       trim: true,
-      minlength: [3, "Test title must be at least 3 characters"],
     },
     testId: {
       type: String,
@@ -44,13 +41,10 @@ const testSchema = new mongoose.Schema(
     description: {
       type: String,
       trim: true,
-      maxlength: [500, "Description cannot exceed 500 characters"],
     },
     timeLimit: {
       type: Number,
       required: [true, "Time limit is required"],
-      min: [1, "Time limit must be at least 1 minute"],
-      max: [300, "Time limit cannot exceed 300 minutes"],
     },
     questions: [questionSchema],
     isActive: {
@@ -68,8 +62,6 @@ const testSchema = new mongoose.Schema(
     passPercentage: {
       type: Number,
       default: 60,
-      min: [0, "Pass percentage cannot be negative"],
-      max: [100, "Pass percentage cannot exceed 100"],
     },
   },
   {

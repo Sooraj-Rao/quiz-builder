@@ -142,7 +142,7 @@
   transform: translateY(-1px);
   box-shadow: var(--shadow);
 }
-.quiz-option.selected {
+.selected {
   border-color: var(--primary-color);
   background: linear-gradient(
     135deg,
