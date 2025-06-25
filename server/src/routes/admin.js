@@ -23,6 +23,7 @@ const authenticateAdmin = (req, res, next) => {
     req.admin = decoded;
     next();
   } catch (error) {
+    console.log(error);
     res.status(401).json({ message: "Invalid admin token" });
   }
 };
@@ -57,6 +58,7 @@ router.post("/login", async (req, res) => {
       },
     });
   } catch (error) {
+    console.log(error);
     res.status(500).json({ message: "Server error" });
   }
 });
@@ -66,6 +68,7 @@ router.get("/users", authenticateAdmin, async (req, res) => {
     const users = await User.find().select("-password").sort({ createdAt: -1 });
     res.json(users);
   } catch (error) {
+    console.log(error);
     res.status(500).json({ message: "Server error" });
   }
 });
@@ -75,6 +78,7 @@ router.get("/tests", authenticateAdmin, async (req, res) => {
     const tests = await Test.find().sort({ createdAt: -1 });
     res.json(tests);
   } catch (error) {
+    console.log(error);
     res.status(500).json({ message: "Server error" });
   }
 });
@@ -101,6 +105,7 @@ router.post("/tests", authenticateAdmin, async (req, res) => {
     await test.save();
     res.status(201).json(test);
   } catch (error) {
+    console.log(error);
     if (error.name === "ValidationError") {
       return res.status(400).json({ message: error.message });
     }
@@ -118,6 +123,7 @@ router.get("/tests/:testId", authenticateAdmin, async (req, res) => {
     }
     res.json(test);
   } catch (error) {
+    console.log(error);
     res.status(500).json({ message: "Server error" });
   }
 });
@@ -153,6 +159,7 @@ router.put("/tests/:testId", authenticateAdmin, async (req, res) => {
 
     res.json(test);
   } catch (error) {
+    console.log(error);
     if (error.name === "ValidationError") {
       return res.status(400).json({ message: error.message });
     }
@@ -170,6 +177,7 @@ router.delete("/tests/:testId", authenticateAdmin, async (req, res) => {
     }
     res.json({ message: "Test deleted successfully" });
   } catch (error) {
+    console.log(error);
     res.status(500).json({ message: "Server error" });
   }
 });
@@ -196,6 +204,7 @@ router.put("/users/:userId", authenticateAdmin, async (req, res) => {
 
     res.json(user);
   } catch (error) {
+    console.log(error);
     if (error.name === "ValidationError") {
       return res.status(400).json({ message: error.message });
     }
@@ -214,6 +223,7 @@ router.delete("/users/:userId", authenticateAdmin, async (req, res) => {
 
     res.json({ message: "User deleted successfully" });
   } catch (error) {
+    console.log(error);
     res.status(500).json({ message: "Server error" });
   }
 });
@@ -244,6 +254,7 @@ router.get("/analytics/:testId", authenticateAdmin, async (req, res) => {
 
     res.json(attempts);
   } catch (error) {
+    console.log(error);
     res.status(500).json({ message: "Server error" });
   }
 });
@@ -314,9 +325,9 @@ router.get(
         },
         results,
       };
-      console.log(detailedResult);
       res.json(detailedResult);
     } catch (error) {
+      console.log(error);
       res.status(500).json({ message: "Server error" });
     }
   }

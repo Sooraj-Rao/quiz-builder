@@ -25,7 +25,6 @@ router.post(
     try {
       const errors = validationResult(req);
       if (!errors.isEmpty()) {
-        console.log(errors.array());
         return res.status(400).json({ errors: errors.array() });
       }
 
@@ -55,7 +54,7 @@ router.post(
         },
       });
     } catch (error) {
-      console.log(error)
+          console.log(error)
       res.status(500).json({ message: "Server error", error: error.message });
     }
   }
@@ -105,6 +104,7 @@ router.post(
         },
       });
     } catch (error) {
+          console.log(error)
       res.status(500).json({ message: "Server error", error: error.message });
     }
   }

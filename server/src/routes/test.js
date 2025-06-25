@@ -19,6 +19,7 @@ router.get("/", authenticate, async (req, res) => {
 
     res.json(tests);
   } catch (error) {
+    console.log(error);
     res.status(500).json({ message: "Server error" });
   }
 });
@@ -47,6 +48,7 @@ router.get("/:testId", authenticate, async (req, res) => {
 
     res.json(test);
   } catch (error) {
+    console.log(error);
     res.status(500).json({ message: "Server error" });
   }
 });
@@ -127,6 +129,7 @@ router.post("/:testId/submit", authenticate, async (req, res) => {
       results,
     });
   } catch (error) {
+    console.log(error);
     res.status(500).json({ message: "Server error" });
   }
 });
@@ -140,6 +143,7 @@ router.get("/user/history", authenticate, async (req, res) => {
       )
     );
   } catch (error) {
+    console.log(error);
     res.status(500).json({ message: "Server error" });
   }
 });
